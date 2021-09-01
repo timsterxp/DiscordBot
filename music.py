@@ -139,8 +139,8 @@ class MusicPlayer:
             self.current = source
 
             self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
-            embed = discord.Embed(title="Now playing", description=f"[{source.title}]({source.web_url}) [{source.requester.mention}]", color=discord.Color.green())
-            self.np = await self._channel.send(embed=embed)
+            #embed = discord.Embed(title="Now playing", description=f"[{source.title}]({source.web_url}) [{source.requester.mention}]", color=discord.Color.green())
+            #self.np = await self._channel.send(embed=embed)
             await self.next.wait()
 
             # Make sure the FFmpeg process is cleaned up.
@@ -214,17 +214,22 @@ class Music(commands.Cog):
                 raise InvalidVoiceChannel('No channel to join. Please either specify a valid channel or join one.')
 
         vc = ctx.voice_client
+        player = self.get_player(ctx)
 
         if vc:
             if vc.channel.id == channel.id:
                 return
             try:
                 await vc.move_to(channel)
+
+                player.volume=0.15
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Moving to channel: <{channel}> timed out.')
         else:
             try:
                 await channel.connect()
+
+                player.volume=0.15
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
         if (random.randint(0, 1) == 0):
@@ -242,7 +247,7 @@ class Music(commands.Cog):
         await ctx.trigger_typing()
 
         vc = ctx.voice_client
-
+        
         if not vc:
             await ctx.invoke(self.connect_)
 

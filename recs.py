@@ -6,7 +6,7 @@ class Recommendations(commands.Cog):
     def __init__(self, bot):
         self.bot = bot
     
-    @commands.command(name="foodspots", aliases=["food","noms"], description= "Recommended Food Spots Around The Bay")   
+    @commands.command(name="food", aliases=["foodspots","noms"], description= "Recommended Food Spots Around The Bay")   
     async def food_(self,ctx):
         embed = discord.Embed(title="Food Spots", description="", color=discord.Color.green())
         embed.add_field(name='Daeho Kalbijjim & Beef Soup', value="Serves tender short ribs with options of cheese/ox tail. https://www.yelp.com/biz/daeho-kalbi-jjim-and-beef-soup-milpitas", inline=False)
