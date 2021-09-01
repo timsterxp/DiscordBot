@@ -229,7 +229,7 @@ class Music(commands.Cog):
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
         if (random.randint(0, 1) == 0):
             await ctx.message.add_reaction('👍')
-        await ctx.guild.change_voice_state(channel=channel,self_mute=True,self_deaf=True)
+        await ctx.guild.change_voice_state(channel=channel,self_mute=False,self_deaf=True)
         #await ctx.send(f'**Joined `{channel}`**')
         await ctx.send('This bot is currently in development and is currently not being hosted on a 24/7 server. This means <@213437796738662401> needs to be on and running me. I recommend you use Rhythm while Boba fixes all the bugs before he hosts it.')
 
