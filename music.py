@@ -56,28 +56,59 @@ class YTDLSource(discord.PCMVolumeTransformer):
     def __getitem__(self, item: str):
         #retrieves information from search results
         return self.__getattribute__(item)
-
+    
     @classmethod
-    async def create_source(cls, ctx, search: str, *, loop, download=False):
+    async def create_playlist(cls,ctx,search:str,*,loop,download=False):
         loop = loop or asyncio.get_event_loop()
 
         to_run = partial(ytdl.extract_info, url=search, download=download)
         data = await loop.run_in_executor(None, to_run)
+        
+        
+        playlist = []
+        
 
-        if 'entries' in data:
-            # take first item from a playlist
-            data = data['entries'][0]
+      
+        for i in data['entries']:
+            data=i
+            playlist.append(str(data['webpage_url']))
 
+        return playlist       
+    
+    
+            
+
+
+    @classmethod
+    async def create_source(cls, ctx, search: str, *, loop, download=False):
+        
+        loop = loop or asyncio.get_event_loop()
+
+        to_run = partial(ytdl.extract_info, url=search, download=download)
+        data = await loop.run_in_executor(None, to_run)
+            
         embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
         await ctx.send(embed=embed)
-
         if download:
             source = ytdl.prepare_filename(data)
         else:
             return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
 
         return cls(discord.FFmpegPCMAudio(source,**cls.ffmpeg_options), data=data, requester=ctx.author)
+    
+    @classmethod
+    async def create_source_no_announce(cls,ctx,search:str,*,loop,download=False):
+        loop = loop or asyncio.get_event_loop()
 
+        to_run = partial(ytdl.extract_info, url=search, download=download)
+        data = await loop.run_in_executor(None, to_run)
+        if download:
+            source = ytdl.prepare_filename(data)
+        else:
+            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+
+        return cls(discord.FFmpegPCMAudio(source,**cls.ffmpeg_options), data=data, requester=ctx.author)
+    
     @classmethod
     async def regather_stream(cls, data, *, loop):
         #Ensure seamless streaming of queue songs
@@ -201,7 +232,17 @@ class Music(commands.Cog):
             self.players[ctx.guild.id] = player
 
         return player
+    
+    async def playlist_(self,ctx,myList):
+        player = self.get_player(ctx)
+        for url in myList:
+            source = await YTDLSource.create_source_no_announce(ctx, str(url),loop=self.bot.loop, download=False)
+            await player.queue.put(source)
 
+        embed=discord.Embed(title="", description=f"Queued [str(len(myList))] songs", color=discord.Color.green())
+        await ctx.send(embed=embed)
+
+            
     @commands.command(name='join', aliases=['connect', 'j'], description="Tells bot to join your voice channel")
     async def connect_(self, ctx, *, channel: discord.VoiceChannel=None):
         #Informs the bot to join the voice channel you are currently in
@@ -215,6 +256,7 @@ class Music(commands.Cog):
 
         vc = ctx.voice_client
         player = self.get_player(ctx)
+        
 
         if vc:
             if vc.channel.id == channel.id:
@@ -236,7 +278,7 @@ class Music(commands.Cog):
             await ctx.message.add_reaction('👍')
         await ctx.guild.change_voice_state(channel=channel,self_mute=False,self_deaf=True)
         #await ctx.send(f'**Joined `{channel}`**')
-        await ctx.send('This bot is currently in development and is currently not being hosted on a 24/7 server. This means <@213437796738662401> needs to be on and running me. I recommend you use Rhythm while Boba fixes all the bugs before he hosts it.')
+        #await ctx.send('This bot is currently in development and is currently not being hosted on a 24/7 server. This means <@213437796738662401> needs to be on and running me. I recommend you use Rhythm while Boba fixes all the bugs before he hosts it.')
 
     @commands.command(name='play', aliases=['sing','p'], description="Plays a song with either given song name or URL")
     async def play_(self, ctx, *, search: str):
@@ -252,12 +294,20 @@ class Music(commands.Cog):
             await ctx.invoke(self.connect_)
 
         player = self.get_player(ctx)
-
+        
+        if 'playlist?list' in search:
+            embed = discord.Embed(title="",description="Playlists are not supported yet, buy Boba a boba and maybe he'll add it soon", color=discord.Color.green())
+            await ctx.send(embed=embed)
+            listOfSongs= await YTDLSource.create_playlist(ctx,search,loop=self.bot.loop,download=False)
+            await self.playlist_(ctx,listOfSongs)
+        else:
+            #await ctx.send('Playlists are currently not supported yet')
+            #return
         # If download is False, source will be a dict which will be used later to regather the stream.
         # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
-        source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
+            source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        await player.queue.put(source)
+            await player.queue.put(source)
 
     @commands.command(name='pause', description="Pauses music")
     async def pause_(self, ctx):
@@ -419,8 +469,8 @@ class Music(commands.Cog):
 
         player = self.get_player(ctx)
 
-        if vc.source:
-            vc.source.volume = vol / 100
+#         if vc.source:
+#             vc.source.volume = vol / 100
 
         player.volume = vol / 100
         embed = discord.Embed(title="", description=f'**`{ctx.author}`** set the volume to **{vol}%**', color=discord.Color.green())
