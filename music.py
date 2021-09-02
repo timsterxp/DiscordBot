@@ -223,9 +223,7 @@ class Music(commands.Cog):
     
     async def playlist_(self,ctx,myList):
         player = self.get_player(ctx)
-        lengthSongs = str(len(myList))
-        embed=discord.Embed(title="", description=f"Queued " + lengthSongs+ f" songs [{ctx.author.mention}]", color=discord.Color.green())
-        await ctx.send(embed=embed)
+      
 
         for url in myList:
             source = await YTDLSource.create_source_no_announce(ctx, str(url),loop=self.bot.loop, download=False)
@@ -287,6 +285,9 @@ class Music(commands.Cog):
         
         if 'playlist?list' in search:
             listOfSongs= await YTDLSource.create_playlist(ctx,search,loop=self.bot.loop,download=False)
+            lengthSongs = str(len(listOfSongs))
+            embed=discord.Embed(title="", description=f"Queued " + lengthSongs+ f" songs [{ctx.author.mention}]", color=discord.Color.green())
+            await ctx.send(embed=embed)
             await self.playlist_(ctx,listOfSongs)
         else:
         # If download is False, source will be a dict which will be used later to regather the stream.
