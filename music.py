@@ -294,7 +294,7 @@ class Music(commands.Cog):
             source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
             await player.queue.put(source)
 
-    @commands.command(name='pause', description="Pauses music")
+    @commands.command(name='pause', aliases=["stop"], description="Pauses music")
     async def pause_(self, ctx):
         #Pauses the audio/queue
         vc = ctx.voice_client
@@ -461,7 +461,7 @@ class Music(commands.Cog):
         embed = discord.Embed(title="", description=f'**`{ctx.author}`** set the volume to **{vol}%**', color=discord.Color.green())
         await ctx.send(embed=embed)
 
-    @commands.command(name='leave', aliases=["stop", "dc", "disconnect", "bye"], description="stops music and disconnects from voice")
+    @commands.command(name='leave', aliases=["dc", "disconnect", "bye"], description="stops music and disconnects from voice")
     async def leave_(self, ctx):
         #Tells bot to leave voice channel (and therefore runs destroy command on MusicPlayer)
         
