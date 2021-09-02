@@ -3,9 +3,9 @@ from discord.ext import commands,tasks
 import os
 from dotenv import load_dotenv
 import youtube_dl
-import music,recs
+import music,recs,misc
 
-cogs=[music,recs]
+cogs=[music,recs,misc]
 
 
 load_dotenv()
