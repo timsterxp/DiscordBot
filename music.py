@@ -9,6 +9,7 @@ from async_timeout import timeout
 from functools import partial
 import youtube_dl
 from youtube_dl import YoutubeDL
+import time
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
@@ -27,11 +28,23 @@ ytdlopts = {
     'source_address': '0.0.0.0'  # ipv6 addresses cause issues sometimes
 }
 
+ytdlopts1 = {
+    'format': 'bestaudio/best',
+    'outtmpl': 'downloads/%(extractor)s-%(id)s-%(title)s.%(ext)s',
+    'restrictfilenames': True,
+    'noplaylist': True,
+    'nocheckcertificate': True,
+    'ignoreerrors': False,
+    'logtostderr': False,
+    'quiet': True,
+    'no_warnings': True,
+    'default_search': 'auto',
+    'source_address': '0.0.0.0',  # ipv6 addresses cause issues sometimes
+    'playlistend': 2
+}
 
+ytdlMax= YoutubeDL(ytdlopts1)
 ytdl = YoutubeDL(ytdlopts)
-
-
-
 class YTDLSource(discord.PCMVolumeTransformer):
     #sets up options to resume streaming of music if FFMPEG receives corrupted data(and therefore wants to terminate)
     ffmpeg_options = {
@@ -54,7 +67,21 @@ class YTDLSource(discord.PCMVolumeTransformer):
     def __getitem__(self, item: str):
         #retrieves information from search results
         return self.__getattribute__(item)
-    
+    @classmethod
+    async def playlist_start(cls,ctx,search:str,*,loop,download=False):
+        loop = loop or asyncio.get_event_loop()
+        to_run = partial(ytdl.extract_info, url=search, download=download)
+        data = await loop.run_in_executor(None, to_run)
+        mySongUrl="";
+        i=0;
+        if 'entries' in data:
+            mySongUrl=str(data['entries'][0])
+            for x in data['entries']:
+                data=x 
+                mySongUrl=str(data['webpage_url'])
+                break
+        return mySongUrl
+        
     @classmethod
     async def create_playlist(cls,ctx,search:str,*,loop,download=False):
         loop = loop or asyncio.get_event_loop()
@@ -69,11 +96,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
 
     @classmethod
     async def create_source(cls, ctx, search: str, *, loop, download=False):
-        
         loop = loop or asyncio.get_event_loop()
 
-        to_run = partial(ytdl.extract_info, url=search, download=download)
+        to_run = partial(ytdlMax.extract_info, url=search, download=download)
         data = await loop.run_in_executor(None, to_run)
+        
+        if 'entries' in data:
+            data=data['entries'][0]
             
         embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
         await ctx.send(embed=embed)
@@ -224,11 +253,16 @@ class Music(commands.Cog):
     async def playlist_(self,ctx,myList):
         player = self.get_player(ctx)
       
-
+        del myList[0]
         for url in myList:
             source = await YTDLSource.create_source_no_announce(ctx, str(url),loop=self.bot.loop, download=False)
             await player.queue.put(source)
-
+            
+    async def play_first_(self,ctx,mySong):
+           player = self.get_player(ctx)
+           print(mySong)
+           source = await YTDLSource.create_source_no_announce(ctx, str(mySong),loop=self.bot.loop, download=False)
+           await player.queue.put(source)
 
             
     @commands.command(name='join', aliases=['connect', 'j'], description="Tells bot to join your voice channel")
@@ -282,18 +316,20 @@ class Music(commands.Cog):
             await ctx.invoke(self.connect_)
 
         player = self.get_player(ctx)
+
+        source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
+
+        await player.queue.put(source)
         
         if 'playlist?list' in search:
+            #firstSong = await YTDLSource.playlist_start(ctx, search,loop=self.bot.loop,download=False)
+            #await self.play_first_(ctx, firstSong)
             listOfSongs= await YTDLSource.create_playlist(ctx,search,loop=self.bot.loop,download=False)
             lengthSongs = str(len(listOfSongs))
             embed=discord.Embed(title="", description=f"Queued " + lengthSongs+ f" songs [{ctx.author.mention}]", color=discord.Color.green())
             await ctx.send(embed=embed)
             await self.playlist_(ctx,listOfSongs)
-        else:
-        # If download is False, source will be a dict which will be used later to regather the stream.
-        # If download is True, source will be a discord.FFmpegPCMAudio with a VolumeTransformer.
-            source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
-            await player.queue.put(source)
+        
 
     @commands.command(name='pause', aliases=["stop"], description="Pauses music")
     async def pause_(self, ctx):
