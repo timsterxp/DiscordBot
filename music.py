@@ -314,6 +314,15 @@ class Music(commands.Cog):
         
         if not vc:
             await ctx.invoke(self.connect_)
+            
+        if (ctx.author.display_name!="Boba"):
+            embed=discord.Embed(title="",description="No " + ctx.author.display_name,color=discord.Color.green())
+            await ctx.send(embed=embed)
+            return;
+        
+        else:
+            embed=discord.Embed(title="",description="Sup Boba", color=discord.Color.green())
+            await ctx.send(embed=embed)
 
         player = self.get_player(ctx)
 
