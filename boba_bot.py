@@ -7,6 +7,7 @@ import music,recs,misc
 
 cogs=[music,recs,misc]
 
+#misc is a personal file used for personal commands in server
 
 load_dotenv()
 # Get the API token from the .env file.
