@@ -14,6 +14,7 @@ import time
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
 
+#one used for playlists, other used for only one search
 ytdlopts = {
     'format': 'bestaudio/best[height<=480]',
     'outtmpl': 'downloads/%(extractor)s-%(id)s-%(title)s.%(ext)s',
