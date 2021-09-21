@@ -272,6 +272,8 @@ class Music(commands.Cog):
         if not channel:
             try:
                 channel = ctx.author.voice.channel
+                embed=discord.Embed(title="",description="Joining " + channel, color=discord.Color.green())
+                await ctx.send(embed=embed)
             except AttributeError:
                 embed = discord.Embed(title="", description="No channel to join. Please call `-join` from a voice channel.", color=discord.Color.green())
                 await ctx.send(embed=embed)
@@ -300,8 +302,7 @@ class Music(commands.Cog):
         if (random.randint(0, 1) == 0):
             await ctx.message.add_reaction('👍')
         await ctx.guild.change_voice_state(channel=channel,self_mute=False,self_deaf=True)
-        #await ctx.send(f'**Joined `{channel}`**')
-        #await ctx.send('This bot is currently in development and is currently not being hosted on a 24/7 server. This means <@213437796738662401> needs to be on and running me. I recommend you use Rhythm while Boba fixes all the bugs before he hosts it.')
+    
 
     @commands.command(name='play', aliases=['sing','p'], description="Plays a song with either given song name or URL")
     async def play_(self, ctx, *, search: str):
@@ -316,10 +317,10 @@ class Music(commands.Cog):
         if not vc:
             await ctx.invoke(self.connect_)
             
-        if (ctx.author.display_name=="Burritomoo"):
-            embed=discord.Embed(title="",description="No " + ctx.author.mention + ", I don't take commands from you" ,color=discord.Color.green())
-            await ctx.send(embed=embed)
-            return;
+     #   if (ctx.author.display_name=="Burritomoo"):
+     #       embed=discord.Embed(title="",description="No " + ctx.author.mention + ", I don't take commands from you" ,color=discord.Color.green())
+     #       await ctx.send(embed=embed)
+     #       return;
     
 
         player = self.get_player(ctx)
