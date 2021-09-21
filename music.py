@@ -272,7 +272,7 @@ class Music(commands.Cog):
         if not channel:
             try:
                 channel = ctx.author.voice.channel
-                embed=discord.Embed(title="",description="Joining " + channel, color=discord.Color.green())
+                embed=discord.Embed(title="",description="Joining " + str(channel), color=discord.Color.green())
                 await ctx.send(embed=embed)
             except AttributeError:
                 embed = discord.Embed(title="", description="No channel to join. Please call `-join` from a voice channel.", color=discord.Color.green())
