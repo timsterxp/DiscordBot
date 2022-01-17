@@ -543,13 +543,8 @@ class Music(commands.Cog):
     @commands.Cog.listener()
     async def on_voice_state_update(self,members,before,after):
         voice_state = members.guild.voice_client
-    
         if voice_state is not None and len(voice_state.channel.members)==1:
-
-            print('Will post here ' + str(channelToPost))
-            postHere=self.bot.get_channel(channelToPost)
-            embed=discord.Embed(title="",description="No one is here :[ so I left",color=discord.Color.green())
-            await postHere.send(embed=embed)
+       
             
             await self.cleanup(members.guild)
         
