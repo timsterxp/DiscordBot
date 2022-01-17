@@ -1,5 +1,6 @@
 import discord
 from discord.ext import commands
+from discord.ext.commands import Bot
 import random
 import asyncio
 import itertools
@@ -10,9 +11,13 @@ from functools import partial
 import youtube_dl
 from youtube_dl import YoutubeDL
 import time
+from _xxsubinterpreters import channel_close
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
+
+joinedChannel=None
+channelToPost=None
 
 #one used for playlists, other used for only one search
 ytdlopts = {
@@ -26,7 +31,12 @@ ytdlopts = {
     'quiet': True,
     'no_warnings': True,
     'default_search': 'auto',
-    'source_address': '0.0.0.0'  # ipv6 addresses cause issues sometimes
+    'source_address': '0.0.0.0',  # ipv6 addresses cause issues sometimes
+    'no_cache_dir': True,
+    'postprocessors':[{
+        'key':'FFmpegExtractAudio',
+        'preferredcodec':'mp3',
+        'preferredquality':'192'}]
 }
 
 ytdlopts1 = {
@@ -41,7 +51,12 @@ ytdlopts1 = {
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6 addresses cause issues sometimes
-    'playlistend': 2
+    'playlistend': 2,
+    'no_cache_dir': True,
+    'postprocessors':[{
+        'key':'FFmpegExtractAudio',
+        'preferredcodec':'mp3',
+        'preferredquality':'192'}]
 }
 
 ytdlMax= YoutubeDL(ytdlopts1)
@@ -165,7 +180,6 @@ class MusicPlayer:
 
         while not self.bot.is_closed():
             self.next.clear()
-
             try:
                 # Wait for the next song. If we timeout cancel the player and disconnect...
                 async with timeout(900):  # 15 minutes...
@@ -173,7 +187,7 @@ class MusicPlayer:
                     source = await self.queue.get()
             except asyncio.TimeoutError:
                 return self.destroy(self._guild)
-
+            
             if not isinstance(source, YTDLSource):
                 # Source was probably a stream (not downloaded)
                 # So we should regather to prevent stream expiration
@@ -205,7 +219,9 @@ class Music(commands.Cog):
     #Contains all commands for Music-related inquiries
 
     __slots__ = ('bot', 'players')
-
+    
+    channelToPost=None
+    
     def __init__(self, bot):
         self.bot = bot
         self.players = {}
@@ -272,8 +288,7 @@ class Music(commands.Cog):
         if not channel:
             try:
                 channel = ctx.author.voice.channel
-                embed=discord.Embed(title="",description="Joining " + str(channel), color=discord.Color.green())
-                await ctx.send(embed=embed)
+                joinedChannel=channel_close
             except AttributeError:
                 embed = discord.Embed(title="", description="No channel to join. Please call `-join` from a voice channel.", color=discord.Color.green())
                 await ctx.send(embed=embed)
@@ -301,6 +316,8 @@ class Music(commands.Cog):
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
         if (random.randint(0, 1) == 0):
             await ctx.message.add_reaction('👍')
+        channelToPost=ctx.channel.id
+        print("channel found" + str(channelToPost))
         await ctx.guild.change_voice_state(channel=channel,self_mute=False,self_deaf=True)
     
 
@@ -366,7 +383,10 @@ class Music(commands.Cog):
 
         vc.resume()
         await ctx.send("Resuming ⏯️")
-
+    @commands.command(name="orbs")
+    async def orbs_(self,ctx):
+        await ctx.send('Yes <@350708347525267456> open orbs')
+        
     @commands.command(name='skip', aliases=['next'], description="Skips to next song")
     async def skip_(self, ctx):
         #Goes to next song in queue if there is one
@@ -505,7 +525,8 @@ class Music(commands.Cog):
         player.volume = vol / 100
         embed = discord.Embed(title="", description=f'**`{ctx.author}`** set the volume to **{vol}%**', color=discord.Color.green())
         await ctx.send(embed=embed)
-
+    
+    
     @commands.command(name='leave', aliases=["dc", "disconnect", "bye"], description="stops music and disconnects from voice")
     async def leave_(self, ctx):
         #Tells bot to leave voice channel (and therefore runs destroy command on MusicPlayer)
@@ -516,12 +537,24 @@ class Music(commands.Cog):
             embed = discord.Embed(title="", description="I'm not connected to a voice channel so I couldn't leave", color=discord.Color.green())
             return await ctx.send(embed=embed)
 
-        if (random.randint(0, 1) == 0):
-            await ctx.message.add_reaction('👋')
         #await ctx.send('**Successfully disconnected**')
 
         await self.cleanup(ctx.guild)
+ 
+    @commands.Cog.listener()
+    async def on_voice_state_update(self,members,before,after):
+        voice_state = members.guild.voice_client
+    
+        if voice_state is not None and len(voice_state.channel.members)==1:
+
+            print('Will post here ' + str(channelToPost))
+            postHere=self.bot.get_channel(channelToPost)
+            embed=discord.Embed(title="",description="No one is here :[ so I left",color=discord.Color.green())
+            await postHere.send(embed=embed)
+            
+            await self.cleanup(members.guild)
         
+   
 
 def setup(bot):
     bot.add_cog(Music(bot))
