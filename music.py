@@ -31,7 +31,7 @@ ytdlopts = {
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6 addresses cause issues sometimes
-    'no_cache_dir': True,
+    'rm_cache_dir': True,
     'postprocessors':[{
         'key':'FFmpegExtractAudio',
         'preferredcodec':'mp3',
@@ -51,7 +51,7 @@ ytdlopts1 = {
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6 addresses cause issues sometimes
     'playlistend': 2,
-    'no_cache_dir': True,
+    'rm_cache_dir': True,
     'postprocessors':[{
         'key':'FFmpegExtractAudio',
         'preferredcodec':'mp3',
