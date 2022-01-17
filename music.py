@@ -11,7 +11,6 @@ from functools import partial
 import youtube_dl
 from youtube_dl import YoutubeDL
 import time
-from _xxsubinterpreters import channel_close
 
 # Suppress noise about console usage from errors
 youtube_dl.utils.bug_reports_message = lambda: ''
