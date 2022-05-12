@@ -546,7 +546,7 @@ class Music(commands.Cog):
     
     @commands.command(name='leaveg', description="Leaves guild")
     async def leaveg_(self,ctx,*,guild_name):
-        guild = self.bot.get_guild(int(GID))
+        guild = self.bot.get_guild(int(guild_name))
         guild.leave()
         await ctx.send(f"Successfully left{guild.name}")
  
