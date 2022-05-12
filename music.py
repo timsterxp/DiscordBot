@@ -201,6 +201,10 @@ class MusicPlayer:
             self.current = source
 
             self._guild.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
+            self._guild.voice_client.pause();
+            await asyncio.sleep(1);
+            self._guild.voice_client.resume();
+            
             #embed = discord.Embed(title="Now playing", description=f"[{source.title}]({source.web_url}) [{source.requester.mention}]", color=discord.Color.green())
             #self.np = await self._channel.send(embed=embed)
             await self.next.wait()
@@ -539,6 +543,12 @@ class Music(commands.Cog):
         #await ctx.send('**Successfully disconnected**')
 
         await self.cleanup(ctx.guild)
+    
+    @commands.command(name='leaveg', description="Leaves guild")
+    async def leaveg(ctx,GID):
+        guild = bot.get_guild(int(GID))
+        await guild.leave()
+        await ctx.send(f"Successfully left{guild.name}")
  
     @commands.Cog.listener()
     async def on_voice_state_update(self,members,before,after):
