@@ -346,7 +346,7 @@ class Music(commands.Cog):
 
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        if (vc.is_playing() or not player.queue.empty()):
+        if vc.is_playing() or not player.queue.empty():
             await player.queue.put(source)
         else:    
             vc.play(discord.FFmpegPCMAudio(source,**cls.ffmpeg_options), data=data, requester=ctx.author)
