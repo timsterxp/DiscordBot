@@ -348,12 +348,12 @@ class Music(commands.Cog):
 
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
-        if not ctx.voice_client.is_playing() and player.queue.empty():
-            newSource= await YTDLSource.regather_stream(source, loop=self.bot.loop)
-            ctx.voice_client.play(newSource, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
+        #if not ctx.voice_client.is_playing() and player.queue.empty():
+        #    newSource= await YTDLSource.regather_stream(source, loop=self.bot.loop)
+        #    ctx.voice_client.play(newSource, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             
-        else:
-             await player.queue.put(source)
+        #else:
+        await player.queue.put(source)
         
         if 'playlist?list' in search:
             #firstSong = await YTDLSource.playlist_start(ctx, search,loop=self.bot.loop,download=False)
