@@ -9,7 +9,7 @@ import traceback
 from async_timeout import timeout
 from functools import partial
 import yt_dlp
-from yt_dlp import YoutubeDL
+from youtube_dl import YoutubeDL
 import time
 
 # Suppress noise about console usage from errors
