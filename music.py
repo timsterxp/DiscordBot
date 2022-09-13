@@ -121,10 +121,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
             
         embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
         await ctx.send(embed=embed)
-        if download:
-            source = ytdl.prepare_filename(data)
-        else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+        #
+        #if download:
+        #    source = ytdl.prepare_filename(data)
+        #else:
+        #    return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
 
         return cls(discord.FFmpegPCMAudio(source,**cls.ffmpeg_options), data=data, requester=ctx.author)
     
