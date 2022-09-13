@@ -112,9 +112,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
     @classmethod
     async def create_source(cls, ctx, search: str, *, loop, download=False):
         loop = loop or asyncio.get_event_loop()
-
-        to_run = partial(ytdlMax.extract_info, url=search, download=download)
-        data = await loop.run_in_executor(None, to_run)
+        data = await loop.run_in_executor(None, lambda: ytdl.extract_info(search, download=download))
         
         if 'entries' in data:
             data=data['entries'][0]
@@ -126,7 +124,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         #    source = ytdl.prepare_filename(data)
         #else:
         #    return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
-        source = data['search'];
+        source = data['search']
         return cls(discord.FFmpegPCMAudio(source,**cls.ffmpeg_options), data=data, requester=ctx.author)
     
     @classmethod
