@@ -127,7 +127,7 @@ class YTDLSource(discord.PCMVolumeTransformer):
         #else:
         #    return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
 
-        return cls(discord.FFmpegPCMAudio(data['webpage_url'],**cls.ffmpeg_options), data=data, requester=ctx.author)
+        return cls(discord.FFmpegPCMAudio(data['search'],**cls.ffmpeg_options), data=data, requester=ctx.author)
     
     @classmethod
     async def create_source_no_announce(cls,ctx,search:str,*,loop,download=False):
