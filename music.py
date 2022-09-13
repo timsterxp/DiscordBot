@@ -8,12 +8,12 @@ import sys
 import traceback
 from async_timeout import timeout
 from functools import partial
-import youtube_dl
-from youtube_dl import YoutubeDL
+import yt_dlp
+from yt_dlp import YoutubeDL
 import time
 
 # Suppress noise about console usage from errors
-youtube_dl.utils.bug_reports_message = lambda: ''
+yt_dlp.utils.bug_reports_message = lambda: ''
 
 joinedChannel=None
 channelToPost=None
@@ -34,8 +34,8 @@ ytdlopts = {
     'rm_cache_dir': True,
     'postprocessors':[{
         'key':'FFmpegExtractAudio',
-        'preferredcodec':'mp3',
-        'preferredquality':'192'}]
+            'preferredcodec':'mp3',
+            'preferredquality':'192'}]
 }
 
 ytdlopts1 = {
