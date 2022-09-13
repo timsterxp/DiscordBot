@@ -2,7 +2,7 @@ import discord
 from discord.ext import commands,tasks
 import os
 from dotenv import load_dotenv
-import youtube_dl
+import yt_dlp
 import music,recs,misc
 
 cogs=[music,recs,misc]
