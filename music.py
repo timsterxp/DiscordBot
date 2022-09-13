@@ -82,6 +82,8 @@ class YTDLSource(discord.PCMVolumeTransformer):
     def __getitem__(self, item: str):
         #retrieves information from search results
         return self.__getattribute__(item)
+    
+    
     @classmethod
     async def playlist_start(cls,ctx,search:str,*,loop,download=False):
         loop = loop or asyncio.get_event_loop()
@@ -347,7 +349,8 @@ class Music(commands.Cog):
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
         if not ctx.voice_client.is_playing() and player.queue.empty():
-            return await ctx.voice_client.play(source, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
+            newSource= await YTDLSource.regather_stream(source)
+            return await ctx.voice_client.play(newSource, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             
         elif not player.queue.empty():
             return await player.queue.put(source)
