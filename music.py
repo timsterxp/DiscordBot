@@ -352,7 +352,7 @@ class Music(commands.Cog):
             newSource= await YTDLSource.regather_stream(source, loop=self.bot.loop)
             ctx.voice_client.play(newSource, after=lambda _: self.bot.loop.call_soon_threadsafe(self.next.set))
             
-        elif not player.queue.empty():
+        else:
              await player.queue.put(source)
         
         if 'playlist?list' in search:
