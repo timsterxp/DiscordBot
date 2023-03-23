@@ -556,7 +556,7 @@ class Music(commands.Cog):
         
         vc = ctx.voice_client
         print("I'm trying to leave")
-        if not vc.is_connected():
+        if vc is not None:
             print(" i will leave")
             embed = discord.Embed(title="", description="I'm not connected to a voice channel so I couldn't leave", color=discord.Color.green())
             return await ctx.send(embed=embed)
