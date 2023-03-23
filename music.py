@@ -550,7 +550,7 @@ class Music(commands.Cog):
 
         await self.cleanup(ctx.guild)
         
-    @commands.command(name='leave', aliases=["dcAgain", "disconnectAgain", "byeAgain"], description="stops music and disconnects from voice")
+    @commands.command(name='leaveAgain', aliases=["dcAgain", "disconnectAgain", "byeAgain"], description="stops music and disconnects from voice")
     async def leaveAgain_(self, ctx):
         #Tells bot to leave voice channel (and therefore runs destroy command on MusicPlayer)
         
