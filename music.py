@@ -549,6 +549,21 @@ class Music(commands.Cog):
         #await ctx.send('**Successfully disconnected**')
 
         await self.cleanup(ctx.guild)
+        
+    @commands.command(name='leave', aliases=["dcAgain", "disconnectAgain", "byeAgain"], description="stops music and disconnects from voice")
+    async def leaveAgain_(self, ctx):
+        #Tells bot to leave voice channel (and therefore runs destroy command on MusicPlayer)
+        
+        vc = ctx.voice_client
+        print("I'm trying to leave")
+        if not vc.is_connected():
+            print(" i will leave")
+            embed = discord.Embed(title="", description="I'm not connected to a voice channel so I couldn't leave", color=discord.Color.green())
+            return await ctx.send(embed=embed)
+
+        #await ctx.send('**Successfully disconnected**')
+
+        await self.cleanup(ctx.guild)
     
     @commands.command(name='leaveg', description="Leaves guild")
     async def leaveg_(self,ctx,*,guild_name):
