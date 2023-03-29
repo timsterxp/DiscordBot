@@ -337,9 +337,6 @@ class Music(commands.Cog):
         #Play command takes a search string or URL and uses YT to play audio
         #Automatically joins the voice channel of requester
         #Sends a Queued Message
-        print("I was requested to play something")
-        await ctx.channel.trigger_typing()
-        print("I got stuck!")
         vc = ctx.voice_client
         
         if not vc:
