@@ -4,30 +4,27 @@ import os
 from dotenv import load_dotenv
 import yt_dlp,youtube_dl
 import music,recs,misc
+import asyncio
+
+load_dotenv()
+# Get the API token from the .env file.
+DISCORD_TOKEN = os.getenv("discord_token")
+intents=discord.Intents.all()
+intents.members=True
+print("loading")
+cogs=[music,recs,misc]
+client = commands.Bot(command_prefix='-',intents=intents)
+
+async def load_cogs():
+    await music.setup(client)
+
+ #   for i in range(len(cogs)):
+ #      await cogs[i].setup(client)
+    
+
 
 async def main():
-    cogs=[music,recs,misc]
-    load_dotenv()
-# Get the API token from the .env file.
-    DISCORD_TOKEN = os.getenv("discord_token")
-
-
-    client = commands.Bot(command_prefix='-',intents=discord.Intents.all())
-
-    for i in range(len(cogs)):
-        await cogs[i].setup(client)
+    await load_cogs()
+    await client.start(DISCORD_TOKEN)
     
-        client.run(DISCORD_TOKEN)
-
-
-#@bot.event
-# async def on_member_join(member):
-#      for channel in member.guild.text_channels :
-#          if str(channel) == "general" :
-#              on_mobile=False
-#              if member.is_on_mobile() == True :
-#                  on_mobile = True
-#              await channel.send("Welcome to the Server {}!!\n On Mobile : {}".format(member.name,on_mobile))             
-#         
-# # TODO : Filter out swear words from messages
-
+asyncio.run(main())
