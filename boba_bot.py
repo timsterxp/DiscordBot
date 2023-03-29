@@ -5,21 +5,19 @@ from dotenv import load_dotenv
 import yt_dlp,youtube_dl
 import music,recs,misc
 
-cogs=[music,recs,misc]
-#test rebase
-#misc is a personal file used for personal commands in server
-
-load_dotenv()
+async def main():
+    cogs=[music,recs,misc]
+    load_dotenv()
 # Get the API token from the .env file.
-DISCORD_TOKEN = os.getenv("discord_token")
+    DISCORD_TOKEN = os.getenv("discord_token")
 
 
-client = commands.Bot(command_prefix='-',intents=discord.Intents.all())
+    client = commands.Bot(command_prefix='-',intents=discord.Intents.all())
 
-for i in range(len(cogs)):
-    cogs[i].setup(client)
+    for i in range(len(cogs)):
+        await cogs[i].setup(client)
     
-client.run(DISCORD_TOKEN)
+        client.run(DISCORD_TOKEN)
 
 
 #@bot.event

@@ -26,5 +26,5 @@ class Recommendations(commands.Cog):
         embed.add_field(name='Boba Bliss',value='IG-Worthy Drinks although a bit of a drive https://www.yelp.com/biz/boba-bliss-dublin-3',inline=False)
         await ctx.send(embed=embed)
         
-def setup(bot):
-    bot.add_cog(Recommendations(bot))
+async def setup(bot):
+    await bot.add_cog(Recommendations(bot))
