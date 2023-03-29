@@ -307,6 +307,7 @@ class Music(commands.Cog):
                 return
             try:
                 await vc.move_to(channel)
+                print("joined here at first");
 
                 player.volume=0.15
             except asyncio.TimeoutError:
@@ -314,7 +315,7 @@ class Music(commands.Cog):
         else:
             try:
                 await channel.connect()
-
+                print("joined here at second");
                 player.volume=0.15
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
