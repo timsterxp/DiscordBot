@@ -291,10 +291,8 @@ class Music(commands.Cog):
         #Informs the bot to join the voice channel you are currently in
         if not channel:
             try:
-                print("I tested checking channel")
                 channel = ctx.author.voice.channel
                 joinedChannel=channel
-                print("Leaving channel!")
             except AttributeError:
                 embed = discord.Embed(title="", description="No channel to join. Please call `-join` from a voice channel.", color=discord.Color.green())
                 await ctx.send(embed=embed)
@@ -302,26 +300,20 @@ class Music(commands.Cog):
 
         vc = ctx.voice_client
         player = self.get_player(ctx)
-        print("I'm testing here!")
         
 
         if vc:
             if vc.channel.id == channel.id:
-                print("I will return!")
                 return
             try:
-                print("First await")
                 await vc.move_to(channel)
-                print("joined here at first")
 
                 player.volume=0.15
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Moving to channel: <{channel}> timed out.')
         else:
             try:
-                print("second await")
                 await channel.connect()
-                print("joined here at second")
                 player.volume=0.15
             except asyncio.TimeoutError:
                 raise VoiceConnectionError(f'Connecting to channel: <{channel}> timed out.')
@@ -349,7 +341,6 @@ class Music(commands.Cog):
     
 
         player = self.get_player(ctx)
-        print("I will play something now!")
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
 
         #if not ctx.voice_client.is_playing() and player.queue.empty():
