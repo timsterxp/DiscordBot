@@ -291,8 +291,10 @@ class Music(commands.Cog):
         #Informs the bot to join the voice channel you are currently in
         if not channel:
             try:
+                print("I tested checking channel")
                 channel = ctx.author.voice.channel
                 joinedChannel=channel
+                print("Leaving channel!")
             except AttributeError:
                 embed = discord.Embed(title="", description="No channel to join. Please call `-join` from a voice channel.", color=discord.Color.green())
                 await ctx.send(embed=embed)
@@ -300,6 +302,7 @@ class Music(commands.Cog):
 
         vc = ctx.voice_client
         player = self.get_player(ctx)
+        print("I'm testing here!")
         
 
         if vc:
