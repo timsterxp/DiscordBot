@@ -338,6 +338,7 @@ class Music(commands.Cog):
         #Automatically joins the voice channel of requester
         #Sends a Queued Message
         print("I was requested to play something")
+        ctx.trigger_typing()
         print("I got stuck!")
         vc = ctx.voice_client
         
