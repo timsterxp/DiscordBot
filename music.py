@@ -320,7 +320,6 @@ class Music(commands.Cog):
         if (random.randint(0, 1) == 0):
             await ctx.message.add_reaction('👍')
         channelToPost=ctx.channel.id
-        print("channel found" + str(channelToPost))
         await ctx.guild.change_voice_state(channel=channel,self_mute=False,self_deaf=True)
     
 
@@ -334,11 +333,6 @@ class Music(commands.Cog):
         if not vc:
             await ctx.invoke(self.connect_)
             
-     #   if (ctx.author.display_name=="Burritomoo"):
-     #       embed=discord.Embed(title="",description="No " + ctx.author.mention + ", I don't take commands from you" ,color=discord.Color.green())
-     #       await ctx.send(embed=embed)
-     #       return;
-    
 
         player = self.get_player(ctx)
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
@@ -550,9 +544,9 @@ class Music(commands.Cog):
         #Tells bot to leave voice channel (and therefore runs destroy command on MusicPlayer)
         
         vc = ctx.voice_client
-        print("I'm trying to leave")
+        
         if vc is not None:
-            print(" i will leave")
+            
             embed = discord.Embed(title="", description="I'm not connected to a voice channel so I couldn't leave", color=discord.Color.green())
             return await ctx.send(embed=embed)
 
