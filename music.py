@@ -50,7 +50,7 @@ ytdlopts1 = {
     'no_warnings': True,
     'default_search': 'auto',
     'source_address': '0.0.0.0',  # ipv6 addresses cause issues sometimes
-    'playlistend': 2,
+    'playlist_items': 2,
     'rm_cache_dir': True,
     'postprocessors':[{
         'key':'FFmpegExtractAudio',
@@ -106,13 +106,11 @@ class YTDLSource(discord.PCMVolumeTransformer):
         data = await loop.run_in_executor(None, to_run)
         playlist = []
 
-        for index,  i in enumerate(data['entries']):
+        for  i in data['entries']:
             data=i
             playlist.append(str(data['webpage_url']))
             
-            # Prevent bot from breaking from long list of YT playlists
-            if index == 20:
-                break
+
         return playlist       
 
     @classmethod
@@ -348,9 +346,7 @@ class Music(commands.Cog):
         #else:
         await player.queue.put(source)
         
-        if 'playlist?list' in search:
-            #firstSong = await YTDLSource.playlist_start(ctx, search,loop=self.bot.loop,download=False)
-            #await self.play_first_(ctx, firstSong)
+        if 'list' in search:
             listOfSongs= await YTDLSource.create_playlist(ctx,search,loop=self.bot.loop,download=False)
             lengthSongs = str(len(listOfSongs))
             embed=discord.Embed(title="", description=f"Queued " + lengthSongs+ f" songs [{ctx.author.mention}]", color=discord.Color.green())
