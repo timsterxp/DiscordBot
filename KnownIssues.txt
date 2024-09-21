@@ -1,0 +1,11 @@
+To-Do List:
+
+Bugs: 
+
+- Fix Queues (Broken from previous ytdlp swap)
+- Fix Playlists (Options changed)
+
+
+QoL:
+
+- Automatically adjust videos towards lyric vids (faster loading and/or no talking from MV)
