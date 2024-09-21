@@ -106,9 +106,13 @@ class YTDLSource(discord.PCMVolumeTransformer):
         data = await loop.run_in_executor(None, to_run)
         playlist = []
 
-        for i in data['entries']:
+        for index,  i in enumerate(data['entries']):
             data=i
             playlist.append(str(data['webpage_url']))
+            
+            # Prevent bot from breaking from long list of YT playlists
+            if index == 20:
+                break
         return playlist       
 
     @classmethod
