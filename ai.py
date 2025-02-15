@@ -3,6 +3,7 @@ from discord.ext import commands
 import openai
 import os
 import requests
+from openai import OpenAI
 
 OPENAI_API_KEY = os.getenv("OPENAI_API_KEY")
 clientAI = OpenAI(api_key= OPENAI_API_KEY)
