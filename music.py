@@ -112,7 +112,6 @@ def is_official(info_dict):
         try:
           #  data = await loop.run_in_executor(None, ytdl.extract_info(search, download=download))
             data = await asyncio.to_thread(ytdl.extract_info, search, download=download)
-            print(data)
         except Exception as e:
             await ctx.send(f"An error occured while processing: {e}")
             return None
@@ -281,7 +280,25 @@ class Music(commands.Cog):
             await vc.move_to(ctx.author.voice.channel)
         player = self.get_player(ctx)
         source = await YTDLSource.create_source(ctx, search, loop=self.bot.loop, download=False)
+        
+        if isinstance(source, YTDLSource):
+            source.volume = player.volume
         await player.queue.put(source)
+        
+    @commands.command(name="volume")
+    async def volume_(self, ctx, volume: float):
+
+        #Adjusts the bot's volume.
+        #volume: 0.0 (mute) to 2.0 (double)
+
+        player = self.get_player(ctx)
+        player.volume = max(0.0, min(volume, 2.0))  # future songs
+
+        vc = ctx.voice_client
+        if vc and vc.is_playing() and isinstance(vc.source, discord.PCMVolumeTransformer):
+            vc.source.volume = player.volume  # current song
+
+            await ctx.send(f"Volume set to {player.volume*100:.0f}%")
 
     @commands.command(name='pause', aliases=["stop"], description="Pauses music")
     async def pause_(self, ctx):
