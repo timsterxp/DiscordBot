@@ -32,7 +32,7 @@ ytdlopts = {
     'source_address': '0.0.0.0',
     'postprocessors': [{
         'key': 'FFmpegExtractAudio',
-        'preferredcodec': 'mp3',
+        'preferredcodec': 'opus',
         'preferredquality': '192'
     }]
 }
@@ -80,37 +80,63 @@ class YTDLSource(discord.PCMVolumeTransformer):
                 break
         return mySongUrl
 
-    @classmethod
-    async def create_playlist(cls, ctx, search:str, *, loop, download=False):
-        loop = loop or asyncio.get_event_loop()
-        to_run = partial(ytdl.extract_info, url=search, download=download)
-        data = await loop.run_in_executor(None, to_run)
-        playlist = []
-        for  i in data['entries']:
-            data = i
-            playlist.append(str(data['webpage_url']))
-        return playlist
+@classmethod
+async def create_playlist(cls, ctx, search: str, *, loop, download=False):
+    loop = loop or asyncio.get_event_loop()
+    data = await asyncio.to_thread(ytdl.extract_info, search, download=download)
+    playlist = []
 
-    @classmethod
-    async def create_source(cls, ctx, search: str, *, loop, download=False):
+    for entry in data.get('entries', []):
+        if not is_official(entry):
+            playlist.append(str(entry['webpage_url']))
 
-        try:
-          #  data = await loop.run_in_executor(None, ytdl.extract_info(search, download=download))
-            data = await asyncio.to_thread(ytdl.extract_info, search, download=download)
-            print(data)
-        except Exception as e:
-            await ctx.send(f"An error occured while processing: {e}")
-            return None
-        if 'entries' in data:
-            data = data['entries'][0]
-        embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
-        await ctx.send(embed=embed)
-        
-        if download:
-            source = ytdl.prepare_filename(data)
+    if not playlist:
+        await ctx.send("No non-official videos found in the playlist.")
+        return []
+
+    return playlist
+
+#helper method for create_source below
+def is_official(info_dict):
+    title = info_dict.get('title', '').lower()
+    uploader = info_dict.get('uploader', '').lower()
+    if any(x in title for x in ["official", "vevo"]) or any(x in uploader for x in ["official", "vevo", "music"]):
+        return True
+    return False
+
+@classmethod
+async def create_source(cls, ctx, search: str, *, loop, download=False):
+    loop = loop or asyncio.get_event_loop()
+    try:
+        # Search YouTube
+        data = await asyncio.to_thread(ytdl.extract_info, search, download=download)
+    except Exception as e:
+        await ctx.send(f"An error occurred while processing: {e}")
+        return None
+
+    # Pick the first non-official entry if this is a search/playlist
+    if 'entries' in data:
+        for entry in data['entries']:
+            if not is_official(entry):
+                data = entry
+                break
         else:
-            return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
-        return cls(discord.FFmpegPCMAudio(source, **cls.ffmpeg_options), data=data, requester=ctx.author)
+            await ctx.send("No non-official video found for your search.")
+            return None
+
+    embed = discord.Embed(
+        title="",
+        description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]",
+        color=discord.Color.green()
+    )
+    await ctx.send(embed=embed)
+
+    if download:
+        source = ytdl.prepare_filename(data)
+    else:
+        return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
+
+    return cls(discord.FFmpegPCMAudio(source, **cls.ffmpeg_options), data=data, requester=ctx.author)
 
     @classmethod
     async def create_source_no_announce(cls, ctx, search:str, *, loop, download=False):
@@ -317,7 +343,6 @@ class Music(commands.Cog):
     async def on_voice_state_update(self, members, before, after):
         voice_state = members.guild.voice_client
         if voice_state is not None and len(voice_state.channel.members) == 1:
-
             await self.cleanup(members.guild)
 
 async def setup(bot):
