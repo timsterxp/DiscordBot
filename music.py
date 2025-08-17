@@ -97,6 +97,7 @@ async def create_playlist(cls, ctx, search: str, *, loop, download=False):
     return playlist
 
 #helper method for create_source below
+#... Some videos are official without having vevo; so not using this yet
 def is_official(info_dict):
     title = info_dict.get('title', '').lower()
     uploader = info_dict.get('uploader', '').lower()
@@ -104,39 +105,30 @@ def is_official(info_dict):
         return True
     return False
 
-@classmethod
-async def create_source(cls, ctx, search: str, *, loop, download=False):
-    loop = loop or asyncio.get_event_loop()
-    try:
-        # Search YouTube
-        data = await asyncio.to_thread(ytdl.extract_info, search, download=download)
-    except Exception as e:
-        await ctx.send(f"An error occurred while processing: {e}")
-        return None
+    @classmethod
 
-    # Pick the first non-official entry if this is a search/playlist
-    if 'entries' in data:
-        for entry in data['entries']:
-            if not is_official(entry):
-                data = entry
-                break
-        else:
-            await ctx.send("No non-official video found for your search.")
+    async def create_source(cls, ctx, search: str, *, loop, download=False):
+
+        try:
+          #  data = await loop.run_in_executor(None, ytdl.extract_info(search, download=download))
+            data = await asyncio.to_thread(ytdl.extract_info, search, download=download)
+            print(data)
+        except Exception as e:
+            await ctx.send(f"An error occured while processing: {e}")
             return None
-
-    embed = discord.Embed(
-        title="",
-        description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]",
-        color=discord.Color.green()
-    )
-    await ctx.send(embed=embed)
-
-    if download:
-        source = ytdl.prepare_filename(data)
-    else:
-        return {'webpage_url': data['webpage_url'], 'requester': ctx.author, 'title': data['title']}
-
-    return cls(discord.FFmpegPCMAudio(source, **cls.ffmpeg_options), data=data, requester=ctx.author)
+        if 'entries' in data:
+            data = data['entries'][0]
+        embed = discord.Embed(title="", description=f"Queued [{data['title']}]({data['webpage_url']}) [{ctx.author.mention}]", color=discord.Color.green())
+        await ctx.send(embed=embed)
+        return cls(
+            discord.FFmpegPCMAudio(
+                data['url'],  # direct audio URL
+                before_options="-reconnect 1 -reconnect_streamed 1 -reconnect_delay_max 5",
+                options="-vn"  # ignore video
+            ),
+            data=data,
+            requester=ctx.author
+        )
 
     @classmethod
     async def create_source_no_announce(cls, ctx, search:str, *, loop, download=False):
